@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model &amp; Method &mdash; CardioSignal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M2 12h4l2-7 4 14 3-10 2 3h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    <span class="brand-name">CardioSignal</span>
+  </div>
+  <nav class="topnav">
+    <a href="/">Screening</a>
+    <a href="/about" class="active">Model &amp; Method</a>
+  </nav>
+</header>
+
+<main class="about-layout">
+  <h1>Model &amp; Method</h1>
+  <p class="hero-sub">This page documents exactly what is running behind the screening tool, reproduced from the
+    original dissertation notebook.</p>
+
+  <div class="about-grid">
+    <div class="panel">
+      <h2>Dataset</h2>
+      <p>1,319 patient records with 8 features: age, gender, heart rate (impulse), systolic/diastolic blood
+        pressure, blood glucose, CK&#8288;-&#8288;MB, and troponin. Target label: <span class="mono">negative</span>
+        / <span class="mono">positive</span> for heart disease indication.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Pipeline</h2>
+      <ol>
+        <li>80/20 train-test split, <span class="mono">random_state=42</span></li>
+        <li>Three base classifiers trained independently:
+          <ul>
+            <li>Random Forest (100 trees)</li>
+            <li>Logistic Regression</li>
+            <li>SVM (linear kernel, probability estimates enabled)</li>
+          </ul>
+        </li>
+        <li>Combined via a soft-voting <span class="mono">VotingClassifier</span> &mdash; predictions are
+          the class-probability average of all three models.</li>
+      </ol>
+    </div>
+
+    <div class="panel">
+      <h2>Performance on held-out test data</h2>
+      <div class="metric-row"><span>Accuracy</span><span class="mono">{{ (metrics.accuracy * 100) | round(2) }}%</span></div>
+      <div class="metric-row"><span>ROC AUC</span><span class="mono">{{ (metrics.roc_auc * 100) | round(2) }}%</span></div>
+      <div class="metric-row"><span>Training samples</span><span class="mono">{{ metrics.n_train }}</span></div>
+      <div class="metric-row"><span>Test samples</span><span class="mono">{{ metrics.n_test }}</span></div>
+
+      <h3>Confusion matrix</h3>
+      <table class="cm-table">
+        <thead><tr><th></th><th>Predicted negative</th><th>Predicted positive</th></tr></thead>
+        <tbody>
+          <tr><th>Actual negative</th><td>{{ metrics.confusion_matrix[0][0] }}</td><td>{{ metrics.confusion_matrix[0][1] }}</td></tr>
+          <tr><th>Actual positive</th><td>{{ metrics.confusion_matrix[1][0] }}</td><td>{{ metrics.confusion_matrix[1][1] }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>Feature importance (Random Forest branch)</h2>
+      <div class="importance-list">
+        {% for feat, imp in metrics.feature_importances.items() | sort(attribute='1', reverse=True) %}
+        <div class="importance-row">
+          <span>{{ metrics.feature_meta[feat].label }}</span>
+          <div class="bar"><div class="bar-fill imp" style="width: {{ ((imp * 100 * 3) | round(1)) }}%;" ></div></div>
+          <span class="mono">{{ (imp * 100) | round(1) }}%</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <p class="back-link"><a href="/">&larr; Back to screening tool</a></p>
+</main>
+
+</body>
+</html>

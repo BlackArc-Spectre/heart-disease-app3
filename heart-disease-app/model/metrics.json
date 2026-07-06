@@ -1,0 +1,97 @@
+{
+  "accuracy": 0.928030303030303,
+  "roc_auc": 0.9704185142440624,
+  "confusion_matrix": [
+    [
+      91,
+      10
+    ],
+    [
+      9,
+      154
+    ]
+  ],
+  "classification_report": {
+    "0": {
+      "precision": 0.91,
+      "recall": 0.900990099009901,
+      "f1-score": 0.9054726368159204,
+      "support": 101.0
+    },
+    "1": {
+      "precision": 0.9390243902439024,
+      "recall": 0.9447852760736196,
+      "f1-score": 0.9418960244648318,
+      "support": 163.0
+    },
+    "accuracy": 0.928030303030303,
+    "macro avg": {
+      "precision": 0.9245121951219513,
+      "recall": 0.9228876875417603,
+      "f1-score": 0.9236843306403761,
+      "support": 264.0
+    },
+    "weighted avg": {
+      "precision": 0.927920362158167,
+      "recall": 0.928030303030303,
+      "f1-score": 0.927961319341574,
+      "support": 264.0
+    }
+  },
+  "feature_importances": {
+    "age": 0.05237025015124126,
+    "gender": 0.011997065856688265,
+    "impluse": 0.019373853286490467,
+    "pressurehight": 0.027970751792111784,
+    "pressurelow": 0.023380424088864742,
+    "glucose": 0.0316929818804769,
+    "kcm": 0.2604621769411015,
+    "troponin": 0.5727524960030251
+  },
+  "n_train": 1055,
+  "n_test": 264,
+  "feature_columns": [
+    "age",
+    "gender",
+    "impluse",
+    "pressurehight",
+    "pressurelow",
+    "glucose",
+    "kcm",
+    "troponin"
+  ],
+  "feature_meta": {
+    "age": {
+      "label": "Age",
+      "unit": "years"
+    },
+    "gender": {
+      "label": "Gender",
+      "unit": "0 = Female, 1 = Male"
+    },
+    "impluse": {
+      "label": "Heart Rate (Impulse)",
+      "unit": "bpm"
+    },
+    "pressurehight": {
+      "label": "Systolic Blood Pressure",
+      "unit": "mmHg"
+    },
+    "pressurelow": {
+      "label": "Diastolic Blood Pressure",
+      "unit": "mmHg"
+    },
+    "glucose": {
+      "label": "Blood Glucose",
+      "unit": "mg/dL"
+    },
+    "kcm": {
+      "label": "CK-MB",
+      "unit": "ng/mL"
+    },
+    "troponin": {
+      "label": "Troponin",
+      "unit": "ng/mL"
+    }
+  }
+}

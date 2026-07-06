@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CardioSignal &mdash; Heart Disease Risk Screening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="scanline"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M2 12h4l2-7 4 14 3-10 2 3h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    <span class="brand-name">CardioSignal</span>
+  </div>
+  <nav class="topnav">
+    <a href="/" class="active">Screening</a>
+    <a href="/about">Model &amp; Method</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-waveform" aria-hidden="true">
+    <svg id="ekg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <polyline id="ekg-line" fill="none" stroke="currentColor" stroke-width="2"
+        points="0,60 40,60 55,60 65,20 75,100 85,30 95,60 140,60 180,60 195,60 205,20 215,100 225,30 235,60 280,60 320,60 335,60 345,20 355,100 365,30 375,60 420,60"/>
+    </svg>
+  </div>
+  <div class="hero-content">
+    <p class="eyebrow">Ensemble diagnostic model &middot; Random Forest &middot; Logistic Regression &middot; SVM</p>
+    <h1>Read the signal before it becomes an event.</h1>
+    <p class="hero-sub">Enter a patient's vitals and cardiac biomarkers. The model cross-references them against
+      {{ "1,050" }} training cases to flag patterns consistent with heart disease risk.</p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-value">{{ accuracy }}%</span><span class="stat-label">Test accuracy</span></div>
+      <div class="stat"><span class="stat-value">{{ auc }}%</span><span class="stat-label">ROC&nbsp;AUC</span></div>
+      <div class="stat"><span class="stat-value">3</span><span class="stat-label">Voting models</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="layout">
+
+  <section class="panel intake-panel">
+    <div class="panel-header">
+      <h2>Patient intake</h2>
+      <span class="panel-tag">New reading</span>
+    </div>
+
+    <form id="intake-form" autocomplete="off">
+      <div class="field-grid">
+
+        <div class="field">
+          <label for="age">Age <span class="unit">years</span></label>
+          <input type="number" id="age" name="age" min="0" max="120" step="1" placeholder="e.g. 58" required>
+        </div>
+
+        <div class="field">
+          <label for="gender">Gender</label>
+          <select id="gender" name="gender" required>
+            <option value="" disabled selected>Select&hellip;</option>
+            <option value="1">Male</option>
+            <option value="0">Female</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="impluse">Heart rate <span class="unit">bpm</span></label>
+          <input type="number" id="impluse" name="impluse" min="0" max="300" step="1" placeholder="e.g. 78" required>
+        </div>
+
+        <div class="field">
+          <label for="pressurehight">Systolic BP <span class="unit">mmHg</span></label>
+          <input type="number" id="pressurehight" name="pressurehight" min="40" max="300" step="1" placeholder="e.g. 130" required>
+        </div>
+
+        <div class="field">
+          <label for="pressurelow">Diastolic BP <span class="unit">mmHg</span></label>
+          <input type="number" id="pressurelow" name="pressurelow" min="20" max="200" step="1" placeholder="e.g. 85" required>
+        </div>
+
+        <div class="field">
+          <label for="glucose">Blood glucose <span class="unit">mg/dL</span></label>
+          <input type="number" id="glucose" name="glucose" min="20" max="900" step="0.1" placeholder="e.g. 110" required>
+        </div>
+
+        <div class="field">
+          <label for="kcm">CK&#8288;-&#8288;MB <span class="unit">ng/mL</span></label>
+          <input type="number" id="kcm" name="kcm" min="0" max="400" step="0.01" placeholder="e.g. 2.4" required>
+        </div>
+
+        <div class="field">
+          <label for="troponin">Troponin <span class="unit">ng/mL</span></label>
+          <input type="number" id="troponin" name="troponin" min="0" max="50" step="0.001" placeholder="e.g. 0.01" required>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="sample-btn" class="btn btn-ghost">Load sample case</button>
+        <button type="submit" id="submit-btn" class="btn btn-primary">Run diagnosis</button>
+      </div>
+      <p id="form-errors" class="form-errors" hidden></p>
+    </form>
+  </section>
+
+  <section class="panel result-panel" id="result-panel">
+    <div class="panel-header">
+      <h2>Diagnostic readout</h2>
+      <span class="panel-tag" id="result-tag">Awaiting data</span>
+    </div>
+
+    <div id="result-empty" class="result-empty">
+      <div class="pulse-dot"></div>
+      <p>Submit patient vitals to generate a risk readout. Nothing is sent anywhere &mdash; this runs against
+        the model on this server only.</p>
+    </div>
+
+    <div id="result-body" class="result-body" hidden>
+      <div class="gauge-row">
+        <div class="gauge" id="gauge">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" class="gauge-track"/>
+            <circle cx="60" cy="60" r="52" class="gauge-fill" id="gauge-fill"/>
+          </svg>
+          <div class="gauge-center">
+            <span id="gauge-value">0%</span>
+            <small>positive likelihood</small>
+          </div>
+        </div>
+        <div class="verdict">
+          <span class="verdict-badge" id="verdict-badge">&mdash;</span>
+          <h3 id="verdict-label">&nbsp;</h3>
+          <p id="verdict-sub" class="muted"></p>
+        </div>
+      </div>
+
+      <div class="breakdown">
+        <div class="breakdown-row">
+          <span>Negative likelihood</span>
+          <div class="bar"><div class="bar-fill neg" id="bar-neg"></div></div>
+          <span id="val-neg" class="mono">0%</span>
+        </div>
+        <div class="breakdown-row">
+          <span>Positive likelihood</span>
+          <div class="bar"><div class="bar-fill pos" id="bar-pos"></div></div>
+          <span id="val-pos" class="mono">0%</span>
+        </div>
+      </div>
+
+      <div id="flags-block" class="flags-block" hidden>
+        <h4>Clinical reference flags</h4>
+        <ul id="flags-list"></ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<section class="disclaimer">
+  <strong>Not a diagnostic device.</strong> CardioSignal is an academic machine-learning project (final-year
+  dissertation implementation). Its output is a statistical pattern match against a training dataset, not a
+  medical diagnosis. Always confirm findings with a licensed clinician and appropriate diagnostic testing.
+</section>
+
+<footer class="footer">
+  <span>CardioSignal &middot; Ensemble Heart Disease Risk Model</span>
+  <a href="/about">View model methodology &amp; metrics &rarr;</a>
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

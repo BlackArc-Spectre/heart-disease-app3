@@ -1,0 +1,51 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "1. Create venv + install requirements",
+      "type": "shell",
+      "windows": {
+        "command": "python -m venv venv; .\\venv\\Scripts\\pip install -r requirements.txt"
+      },
+      "linux": {
+        "command": "python3 -m venv venv && ./venv/bin/pip install -r requirements.txt"
+      },
+      "osx": {
+        "command": "python3 -m venv venv && ./venv/bin/pip install -r requirements.txt"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "2. Train the ensemble model",
+      "type": "shell",
+      "windows": {
+        "command": ".\\venv\\Scripts\\python train_model.py"
+      },
+      "linux": {
+        "command": "./venv/bin/python train_model.py"
+      },
+      "osx": {
+        "command": "./venv/bin/python train_model.py"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "3. Run CardioSignal locally",
+      "type": "shell",
+      "windows": {
+        "command": ".\\venv\\Scripts\\python app.py"
+      },
+      "linux": {
+        "command": "./venv/bin/python app.py"
+      },
+      "osx": {
+        "command": "./venv/bin/python app.py"
+      },
+      "problemMatcher": [],
+      "isBackground": true,
+      "group": "build"
+    }
+  ]
+}
